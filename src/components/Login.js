@@ -6,6 +6,7 @@ import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
+import { USER_AVATAR } from "../utils/constants";
 
 const Login = () => {
     const [isSigninForm, setIsSigninForm] = useState(true);
@@ -20,7 +21,6 @@ const Login = () => {
     const handleButtonClick = () => {
         // Handle sign in or sign up logic here
         const message=checkValidData(email.current.value, password.current.value);
-        console.log(message);
         setErrorMessage(message);
         if(message) return;
         if(!isSigninForm){
@@ -31,19 +31,19 @@ const Login = () => {
                 const user = userCredential.user;
 
                 updateProfile(user, {
-                  displayName: name.current.value, photoURL: "https://tse2.mm.bing.net/th/id/OIP.ntf4CyHHstfWkonT-RHFxwHaGg?r=0&pid=Api&h=220&P=0"
+                  displayName: name.current.value, photoURL: USER_AVATAR 
                 }).then(() => {
                   // Profile updated!
                   const {uid,email,displayName, photoURL} = auth.currentUser;
                 dispatch(addUser({uid:uid, email: email, displayName: displayName, photoURL: photoURL}));
-                  navigate("/browse");
+                 
                   // ...
                 }).catch((error) => {
                   // An error occurred
                   // ...
                   setErrorMessage(error.message);
                 });
-                console.log(user);
+                
                 
                 // ...
             })
@@ -60,7 +60,7 @@ const Login = () => {
             .then((userCredential) => {
                 // Signed in 
                 const user = userCredential.user;
-                console.log(user);
+                
                 navigate("/browse");
                 // ...
             })

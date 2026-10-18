@@ -1,11 +1,15 @@
 import { signOut} from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { addUser, removeUser } from "../utils/userSlice";
+import { LOGO } from "../utils/constants";
 
 const Header = () => {
   const navigate= useNavigate();
+  const dispatch= useDispatch();
   const user = useSelector(store => store.user);
 
   const handleSignOut = () =>{
@@ -17,11 +21,34 @@ const Header = () => {
         navigate("/error");
       });
   }
+
+   useEffect(()=>{
+          const unsubscribe =  onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in, see docs for a list of available properties
+                // https://firebase.google.com/docs/reference/js/auth.user
+                const {uid,email,displayName, photoURL} = user;
+                dispatch(addUser({uid:uid, email: email, displayName: displayName, photoURL: photoURL}));
+              
+                navigate("/browse");
+                
+                // ...
+            } else {
+                // User is signed out
+                // ...
+                dispatch(removeUser());
+                navigate("/");
+                
+            }
+            });
+            //unsubscribe when component unmounts
+            return () => unsubscribe();
+    },[]);
     
   return (
     
     <div className="absolute w-screen px-8 py-2 bg-gradient-to-b from-black z-10 flex justify-between">
-        <img className="w-20 " src="https://occ.a.nflxso.net/dnmt/api/v6/iL4oJVDYZ8KLSrJ6eG2OwtghbfQ/AAAAAVIENVPMEM3Kn4hVzJseX4N8xPjtBDIpwuFDucWksdxQZ8Ss6Xf8U_vt7ThYYfRmzq0x1CS3nOwTGyVrgADvwfB_tPiK_liS2RjvI40RJSzbKRk-o8b3nCxHfCCnBsyB2XBB9_vRoSmN.svg" 
+        <img className="w-20 " src={LOGO} 
         alt="Netflix Logo" />
     
     {user && <div className="flex p-4">
